@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1>Select what divisions and how many contest info you want</h1>
+    <form action="/api/cf/ratedcontest" method="POST">
+      <table>
+        <tr>
+          <td>Number of Contests: </td>
+          <td><input type="number" name="count" value="10" required></td>
+        </tr>
+        <tr>
+          <td>Div 1</td>
+          <td><input type="checkbox" name="div1" value="div1"></td>
+        </tr>
+        <tr>
+          <td>Div 2</td>
+          <td><input type="checkbox" name="div2" value="div2" checked></td>
+        </tr>
+        <tr>
+          <td>Div 3</td>
+          <td><input type="checkbox" name="div3" value="div3" checked></td>
+        </tr>
+        <tr>
+          <td colspan="2"><input type="submit" value="Get Contest Info"></td>
+        </tr>
+      </table>
+      
+    </form>
+
+
+  </body>
+</html>
