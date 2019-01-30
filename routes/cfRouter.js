@@ -6,7 +6,7 @@ router.route("/")
         res.send("This is the cf api")
     })
     .post(function(req,res){
-        res.send(req);
+        res.send(req.body);
     })
     ;
 
