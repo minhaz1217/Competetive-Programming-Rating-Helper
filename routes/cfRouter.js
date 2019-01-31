@@ -22,7 +22,7 @@ router.route("/")
         res.send(req.body);
     })
     ;
-// returns a list of rated contest
+// returns a list of rated contest,depending on count and selected divisions
 router.route("/ratedcontest")
     .get(function(req,res){
         
@@ -90,5 +90,59 @@ router.route("/ratedcontest")
         });
         
     })
+;
+//returns a list of users recent contest activity
+router.route("/userrecentcontest")
+.get(function(req,res){
+    //return res.status(200).send(JSON.parse('{"contest": [1100,1102,1099,1096,1095,1092,1084,1088,1056,1080,1028,1027,1023,1016,1005]}'));
+    var name = "minhaz1217"
+    var ratingsUrl = "https://codeforces.com/api/user.rating?handle="+name;
+    // gets users ratings changes, so as a result gets recent contest
+    var neededCount = Number(10) + 5;
+    var testData =JSON.parse('{"contest": [1100,1102,1099,1096,1095,1092,1084,1088,1056,1080,1028,1027,1023,1016,1005]}');
+    var receivedData = "";
+    var finalData = "sdf";
+
+    console.log(ratingsUrl);
+    //return res.status(200).send(JSON.parse('{"contest": [1100,1102,1099,1096,1095,1092,1084,1088,1056,1080,1028,1027,1023,1016,1005]}'));
+
+
+    https.get(ratingsUrl, (resp) =>{
+        resp.on('data', (chunk) => {
+            receivedData += chunk;
+          });
+        resp.on("end", () =>{
+            function setCharAt(str,index,chr) {
+                if(index > str.length-1) return str;
+                return str.substr(0,index) + chr + str.substr(index+1);
+            }
+            var userInfo = JSON.parse(receivedData);
+            var myRatingsCount = 0;
+
+            if(userInfo.status == "OK"){
+                var outputData = '{"name": "'+name+'","contest": [';
+
+                for(var i=userInfo.result.length-1;i>=0;i--){
+                    contestId = userInfo.result[i].contestId;
+                    outputData = outputData + contestId +",";
+                    myRatingsCount++;
+                    if(myRatingsCount >= neededCount){
+                        break;
+                    }
+                }
+                if(outputData[outputData.length-1] == ','){
+                    outputData = setCharAt(outputData, outputData.length-1, "");
+                }
+                outputData += ']}';
+                return res.status(200).send(JSON.parse(outputData));
+            }else{
+                console.log("NOPE");
+            }
+        })
+    });
+
+    //return res.status(200).send(JSON.parse('{"contest": [1100,1102,1099,1096,1095,1092,1084,1088,1056,1080,1028,1027,1023,1016,1005]}'));
+})
+
 ;
 module.exports  = router;
