@@ -9,7 +9,9 @@ router.get('/', function(req, res, next) {
 */
 router.route("/")
   .get(function(req, res){
-    return res.send(200, test);
+    //res.send("HELLO WORLD");
+    res.render("contestattended");
+    //return res.send(200, test);
   })
 
 
