@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Contest Attended</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1>Select what divisions and how many contest info you want</h1>
+    <form action="/api/cf/contestattended" method="POST">
+      <table>
+          <tr>
+              <td>Names:</td>
+              <td><textarea name="names" width=50 height=50></textarea></td>
+          </tr>
+        <tr>
+          <td>Number of Contests: </td>
+          <td><input type="number" name="count" value="10" required></td>
+        </tr>
+        <tr>
+          <td>Div 1</td>
+          <td><input type="checkbox" name="div1" value="div1"></td>
+        </tr>
+        <tr>
+          <td>Div 2</td>
+          <td><input type="checkbox" name="div2" value="div2" checked></td>
+        </tr>
+        <tr>
+          <td>Div 3</td>
+          <td><input type="checkbox" name="div3" value="div3" checked></td>
+        </tr>
+        <tr>
+          <td colspan="2"><input type="submit" value="How Many Attended"></td>
+        </tr>
+      </table>
+      
+    </form>
+
+
+  </body>
+</html>
