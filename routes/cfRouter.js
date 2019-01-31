@@ -96,66 +96,126 @@ router.route("/userrecentcontest")
 .get(function(req,res){
     res.render("userrecentcontest", {title: "CODEFORCES"});
 
-    /*
-    //return res.status(200).send(JSON.parse('{"contest": [1100,1102,1099,1096,1095,1092,1084,1088,1056,1080,1028,1027,1023,1016,1005]}'));
-    var name = "minhaz1217"
-    var ratingsUrl = "https://codeforces.com/api/user.rating?handle=";
-    // gets users ratings changes, so as a result gets recent contest
-    var neededCount = Number(10) + 5;
-    var testData =JSON.parse('{"contest": [1100,1102,1099,1096,1095,1092,1084,1088,1056,1080,1028,1027,1023,1016,1005]}');
-    var receivedData = "";
-    var finalData = "sdf";
-
-    console.log(ratingsUrl);
-    //return res.status(200).send(JSON.parse('{"contest": [1100,1102,1099,1096,1095,1092,1084,1088,1056,1080,1028,1027,1023,1016,1005]}'));
-
-
-    https.get(ratingsUrl+name, (resp) =>{
-        resp.on('data', (chunk) => {
-            receivedData += chunk;
-          });
-        resp.on("end", () =>{
-            function setCharAt(str,index,chr) {
-                if(index > str.length-1) return str;
-                return str.substr(0,index) + chr + str.substr(index+1);
-            }
-            var userInfo = JSON.parse(receivedData);
-            var myRatingsCount = 0;
-
-            if(userInfo.status == "OK"){
-                var outputData = '{"name": "'+name+'","contest": [';
-
-                for(var i=userInfo.result.length-1;i>=0;i--){
-                    contestId = userInfo.result[i].contestId;
-                    outputData = outputData + contestId +",";
-                    myRatingsCount++;
-                    if(myRatingsCount >= neededCount){
-                        break;
-                    }
-                }
-                if(outputData[outputData.length-1] == ','){
-                    outputData = setCharAt(outputData, outputData.length-1, "");
-                }
-                outputData += ']}';
-                return res.status(200).send(JSON.parse(outputData));
-            }else{
-                return res.status(404).send("User not found");
-                console.log("NOPE");
-            }
-        })
-        
-    });
-*/
     //return res.status(200).send(JSON.parse('{"contest": [1100,1102,1099,1096,1095,1092,1084,1088,1056,1080,1028,1027,1023,1016,1005]}'));
     
 })
+//post method of : http://localhost:3000/api/cf/userrecentcontest
 .post(function(req,res){
-    var names = (req.body.names).split("\r");
-    var msg = "";
-    for(var i=0;i<names.length;i++){
-        msg += names[i] + "<br>";
+    function getRecentRatings(name, neededCount, callback){
+        console.log("RECEIEVED: "+ name );
+
+        var ratingsUrl = "https://codeforces.com/api/user.rating?handle=";
+        var receivedData = "";
+        var outputData = "";
+        https.get(ratingsUrl+ name, (resp) =>{
+            resp.on('data', (chunk) => {
+                receivedData += chunk;
+              });
+            resp.on("end", () =>{
+                function setCharAt(str,index,chr) {
+                    if(index > str.length-1) return str;
+                    return str.substr(0,index) + chr + str.substr(index+1);
+                }
+                var userInfo = JSON.parse(receivedData);
+                var myRatingsCount = 0;
+    
+                if(userInfo.status == "OK"){
+                    outputData += '{"name": "' +name+ '","contest": [';    
+                    for(var i=userInfo.result.length-1;i>=0;i--){
+                        var contestId = userInfo.result[i].contestId;
+                        outputData = outputData + contestId +",";
+                        myRatingsCount++;
+                        if(myRatingsCount >= neededCount){
+                            break;
+                        }
+                    }
+                    if(outputData[outputData.length-1] == ','){
+                        outputData = setCharAt(outputData, outputData.length-1, "");
+                    }
+                    outputData += ']}';
+                    callback(outputData);
+                }else{
+                    callback("NOT FOUND: " + name);
+                }
+    
+            })
+            
+        });
+        
     }
-    res.status(200).send(msg);
+    function getFullList(names, needCount, callback){
+        var count = 0;
+        var i =0;
+        var outputData = "";
+        names.forEach( function(name){
+            getRecentRatings(name.trim(), needCount, function(contestList){
+                console.log(name+ " : " + contestList);
+                if(i>0){
+                    outputData += ',{' + contestList + '}';
+                }else{
+                    outputData += '{' + contestList + '}';
+                }
+                i++;
+                if(i == names.length){
+                    callback(outputData);
+                }
+            });
+        } );
+        /*
+        for(var i=0;i<names.length;i++){
+            getRecentRatings(names[i].trim(), needCount, function(contestList){
+                console.log(i+ " : " + contestList);
+                if(i>0){
+                    outputData += ',{' + contestList + '}';
+                }else{
+                    outputData += '{' + contestList + '}';
+                }
+
+                if(i <= names.length-1){
+                    callback(outputData);
+                }
+            });
+        }
+        */
+        //console.log(i + " " + outputData);
+    }
+
+
+
+
+    var names = (req.body.names).split("\r");
+    //return res.status(200).send(JSON.parse('{"contest": [1100,1102,1099,1096,1095,1092,1084,1088,1056,1080,1028,1027,1023,1016,1005]}'));
+    // gets users ratings changes, so as a result gets recent contest
+    var neededCount = Number(10) + 5;
+    var receivedData = "";
+    var outputData = '';
+    console.log("Length: "+ names.length);
+    getFullList(names, neededCount, function(msg){
+        outputData += msg;
+        console.log("MESSAGE: " + msg);
+        res.send(outputData);
+    });
+
+
+    /*
+    for(j=0;j<names.length;j++){
+        name = names[0].trim();
+        receivedData = "";
+        //console.log(ratingsUrl+name + ",");
+        
+        getRecentRatings(name, neededCount, function(callback){
+            outputData += callback;
+        });
+    
+    }
+    if(j>=names.length){
+        outputData += "]}";
+        return res.status(200).send(JSON.parse(outputData));
+    }
+    */
+    
+    
+    //res.status(200).send(msg);
 })
 ;
 module.exports  = router;
